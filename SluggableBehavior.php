@@ -1,13 +1,46 @@
 <?php
 
+/**
+ * This behavior allow to automatically generate slug and place it to the model attribute
+ *
+ * Example of usage:
+ * Append this code to `behaviors()` in model class
+ * <pre>
+ * 'sluggableBehavior' => array(
+ *      'class'          => 'ext.yii-sluggable-behavior.SluggableBehavior',
+ *      'delimiter'      => '-',
+ *      'sluggable_attr' => 'title',
+ *      'slug_attr'      => 'slug',
+ *      'allow_update'   => true,
+ * ),
+ * </pre>
+ */
 class SluggableBehavior extends CActiveRecordBehavior
 {
-    public $delimiter;
+    /**
+     * Delimiter for building slug string, default equal to `-`,
+     * can be changed whe enable behavior.
+     */
+    public $delimiter = '-';
 
+    /**
+     * Holds name of model attribute that need to bee slugged
+     */
     public $sluggable_attr;
 
+    /**
+     * Name of the model attribute what will represent slug
+     */
     public $slug_attr;
 
+    /**
+     * Allow change slug attribute when update model
+     */
+    public $allow_update;
+
+    /**
+     * {@inheritdoc}
+     */
     public function beforeSave()
     {
         $model = $this->getOwner();
