@@ -36,13 +36,16 @@ class SluggableBehavior extends CActiveRecordBehavior
     /**
      * Allow change slug attribute when update model
      */
-    public $allow_update;
+    public $allow_update = false;
 
     /**
      * {@inheritdoc}
      */
     public function beforeSave()
     {
+        if (!$this->allow_update && !$this->getOwner()->isNewRecord) {
+            return;
+        }
         $model = $this->getOwner();
         $attr = $this->sluggable_attr;
         $words = explode(' ', $model->$attr);
