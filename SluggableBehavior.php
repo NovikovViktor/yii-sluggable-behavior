@@ -9,9 +9,10 @@
  * 'sluggableBehavior' => array(
  *      'class'          => 'ext.yii-sluggable-behavior.SluggableBehavior',
  *      'delimiter'      => '-',
- *      'sluggable_attr' => 'title',
+ *      'sluggable_attr' => 'name',
  *      'slug_attr'      => 'slug',
  *      'allow_update'   => true,
+ *      'length'         => 5,
  * ),
  * </pre>
  */
@@ -20,23 +21,38 @@ class SluggableBehavior extends CActiveRecordBehavior
     /**
      * Delimiter for building slug string, default equal to `-`,
      * can be changed whe enable behavior.
+     *
+     * @var string
      */
     public $delimiter = '-';
 
     /**
      * Holds name of model attribute that need to bee slugged
+     *
+     * @var string
      */
     public $sluggable_attr;
 
     /**
      * Name of the model attribute what will represent slug
+     *
+     * @var string
      */
     public $slug_attr;
 
     /**
      * Allow change slug attribute when update model
+     *
+     * @var bool
      */
     public $allow_update = false;
+
+    /**
+     * Define length of slug, useful when title too long, and you want avoid bulky URL's
+     *
+     * @var integer
+     */
+    public $length;
 
     /**
      * {@inheritdoc}
@@ -57,7 +73,10 @@ class SluggableBehavior extends CActiveRecordBehavior
                 unset($words[$key]);
             }
         }
+        if ($this->length) {
+            $words = array_slice($words, 0, $this->length);
+        }
         $slug = implode($this->delimiter, $words);
-        $model->slug = $slug;
+        $model->$slug_attr = $slug;
     }
 }
