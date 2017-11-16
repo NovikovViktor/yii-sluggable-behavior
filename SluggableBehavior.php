@@ -1,25 +1,19 @@
 <?php
-/**
- * SluggableBehavior
- *
- * @author Viktor Novikov <viktor.novikov95@gmail.com>
- * @link https://github.com/NovikovViktor
- */
 
 /**
- * This behavior allow to automatically generate slug and place it to the model attribute. It necessary for
- * creating user-friendly URL's.
+ * This behavior allows automatically generate slug and store it to the model attribute.
+ * It necessary for creating user-friendly URL's.
  *
  * Example of usage:
  * Append this code to `behaviors()` in model class
  * <pre>
  *      'sluggableBehavior' => array(
  *          'class'          => 'ext.yii-sluggable-behavior.SluggableBehavior',
- *          'delimiter'      => '-',
- *          'sluggable_attr' => 'name',
- *          'slug_attr'      => 'slug',
- *          'allow_update'   => true,
- *          'length'         => 5,
+ *          'delimiter'      => '-',    // words delimiter
+ *          'sluggable_attr' => 'name', // name of attr what need to be "slugged"
+ *          'slug_attr'      => 'slug', // attr for store slug
+ *          'allow_update'   => true,   // allow update slug or not
+ *          'length'         => 5,      // length of words to place into slug
  *      ),
  * </pre>
  */
@@ -66,24 +60,21 @@ class SluggableBehavior extends CActiveRecordBehavior
      */
     public function beforeSave()
     {
-        if (!$this->allow_update && !$this->getOwner()->isNewRecord) { // check we could change slug
+        $model = $this->getOwner();
+
+        if (!($this->allow_update && $model->isNewRecord)) { // check if we could update slug
             return;
         }
-        $model = $this->getOwner();
-        $attr = $this->sluggable_attr;
-        $words = explode(' ', $model->$attr);
-        foreach ($words as $key => $word) { // run through all words in sluggable attr (e.g. title), and prepare it
-            $word = strtolower($word);
-            $parsed = preg_replace('/[^A-Za-z0-9\-]/', '', $word);
-            $words[$key] = $parsed;
-            if (!$word || !$parsed) {
-                unset($words[$key]);
-            }
+
+        $sluggable_attribute = $this->sluggable_attr;
+        $slugWords           = explode(' ', $model->$sluggable_attribute);
+        foreach ($slugWords as $key => $word) {
+            $parsedWord  = preg_replace('/[^A-Za-z0-9\-]/', '', strtolower($word));
+            $words[$key] = $parsedWord;
         }
-        if ($this->length) { // check if length of array is allowed, if not slice it
-            $words = array_slice($words, 0, $this->length);
-        }
-        $slug = implode($this->delimiter, $words);
-        $model->$slug_attr = $slug; // assign slug to model
+
+        $slugWords = array_slice($slugWords, 0, $this->length);
+
+        $model->$sluggable_attribute = implode($this->delimiter, $slugWords);
     }
 }
